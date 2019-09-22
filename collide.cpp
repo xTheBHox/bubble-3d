@@ -21,6 +21,13 @@ bool collide_AABB_vs_AABB(
 }
 
 
+//helper: normalize but don't return NaN:
+glm::vec3 careful_normalize(glm::vec3 const &in) {
+	glm::vec3 out = glm::normalize(in);
+	//if 'out' ended up as NaN (e.g., because in was a zero vector), reset it:
+	if (!(out.x == out.x)) out = glm::vec3(1.0f, 0.0f, 0.0f);
+	return out;
+}
 
 //helper: ray vs sphere:
 bool collide_ray_vs_sphere(
