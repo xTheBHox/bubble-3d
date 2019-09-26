@@ -148,11 +148,7 @@ bool collide_swept_sphere_vs_triangle(
 
 	float dot_from  = glm::dot(norm, sphere_from-triangle_a);
 	float dot_to = glm::dot(norm, sphere_to-triangle_a);
-/*
-	if(dot_from*dot_to>0){
-		if(glm::min(abs(dot_from), abs(dot_to))>sphere_radius)  return false;
-	}
-*/	
+	
 	float t0 = 1.0;
 	float t1 = -1.0;
 	//above triangle
