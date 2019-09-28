@@ -11,19 +11,12 @@ bool collide_AABB_vs_AABB(
 	glm::vec3 const &a_min, glm::vec3 const &a_max,
 	glm::vec3 const &b_min, glm::vec3 const &b_max
 ) {
-	//-----------------------------
-
-	//First task: fill in this function
-	return !(a_min.x>b_max.x
-		|| b_min.x>a_max.x
-		|| a_min.y>b_max.y
-		|| b_min.y>a_max.y
-		|| a_min.z>b_max.z
-		|| b_min.z>a_max.z);
-
-	//-----------------------------
+	return !(
+    a_min.x > b_max.x || b_min.x > a_max.x ||
+    a_min.y > b_max.y	|| b_min.y > a_max.y ||
+    a_min.z > b_max.z	|| b_min.z > a_max.z
+  );
 }
-
 
 //helper: normalize but don't return NaN:
 glm::vec3 careful_normalize(glm::vec3 const &in) {
@@ -80,49 +73,50 @@ bool collide_ray_vs_cylinder(glm::vec3 ray_start, glm::vec3 ray_direction,
 		glm::vec3 cylinder_a, glm::vec3 cylinder_b, float radius,
 		float *collision_t, glm::vec3 *collision_at, glm::vec3 *collision_out)
 {
-	glm::vec3 along = cylinder_b-cylinder_a;
+	glm::vec3 along = cylinder_b - cylinder_a;
 
 	float limit = glm::dot(along, along);
 
 	float t0 = 0.0;
 	float t1 = 1.0;
 
-	float dot_from = glm::dot(ray_start-cylinder_a, along);
-	float dot_to = glm::dot(ray_start+ray_direction-cylinder_a, along);
+	float dot_from = glm::dot(ray_start - cylinder_a, along);
+	float dot_to = glm::dot(ray_start + ray_direction - cylinder_a, along);
 
-	if(dot_from<0.0f)
+	if (dot_from < 0.0f)
 	{
-		if(dot_to<=dot_from) return false;
-		t0 = (0.0-dot_from)/(dot_to-dot_from);
+		if(dot_to <= dot_from) return false;
+		t0 = (0.0f - dot_from) / (dot_to - dot_from);
 	}
-	if(dot_from>limit)
+	if (dot_from > limit)
 	{
-		if(dot_from>=dot_to) return false;
-		t0 = (limit-dot_from)/(dot_to-dot_from);
+		if(dot_to >= dot_from) return false; // HERE
+		t0 = (limit - dot_from) / (dot_to - dot_from);
 	}
-	if(dot_to<0.0f)
+	if (dot_to < 0.0f)
 	{
-		if(dot_from<=dot_to) return false;
-		t1 = (0-dot_from)/(dot_to-dot_from);
+		if (dot_from <= dot_to) return false;
+		t1 = (0.0f - dot_from) / (dot_to - dot_from);
 	}
-	if(dot_to>limit)
+	if (dot_to > limit)
 	{
-		if(dot_from>=dot_to) return false;
-		t1 = (limit-dot_from)/(dot_to-dot_from);
+		if (dot_from >= dot_to) return false;
+		t1 = (limit - dot_from) / (dot_to - dot_from);
 	}
 
-	glm::vec3 projected_pt = cylinder_a+glm::dot(ray_start-cylinder_a, along)/glm::dot(along, along)*along;
-	glm::vec3 projected_dir = glm::dot(ray_direction, along)/glm::dot(along, along)*along;
+	glm::vec3 projected_pt = cylinder_a + dot_from * along / limit;
+	glm::vec3 projected_dir = (dot_to - dot_from) * along / limit;
 
-	float t = t1-t0;
-	if(collide_ray_vs_sphere(
-				ray_start-projected_pt+t0*(ray_direction-projected_dir), 
-				 ray_direction-projected_dir, glm::vec3(0.0f), radius,
-			       	&t, nullptr, nullptr)){
-		
+	float t = t1 - t0;
+
+	if (collide_ray_vs_sphere(
+		ray_start - projected_pt + t0 * (ray_direction - projected_dir),
+		ray_direction - projected_dir, glm::vec3(0.0f), radius,
+		&t, nullptr, nullptr)){
+
 		if(collision_t) *collision_t = t;
-		if(collision_out) *collision_out = careful_normalize(ray_start-projected_pt+t*(ray_direction-projected_dir));
-		if(collision_at) *collision_at = ray_start+t*ray_direction-radius*(*collision_out);
+		if(collision_out) *collision_out = careful_normalize(ray_start - projected_pt + t * (ray_direction - projected_dir));
+		if(collision_at) *collision_at = ray_start + t * ray_direction - radius * (*collision_out);
 		return true;
 	}
 
@@ -134,9 +128,6 @@ bool collide_swept_sphere_vs_triangle(
 	glm::vec3 const &triangle_a, glm::vec3 const &triangle_b, glm::vec3 const &triangle_c,
 	float *collision_t, glm::vec3 *collision_at, glm::vec3 *collision_out
 ) {
-	//-----------------------------
-
-	//Second task: fill in this function
 
 	float t = 2.0f;
 	if(collision_t){
@@ -148,7 +139,7 @@ bool collide_swept_sphere_vs_triangle(
 
 	float dot_from  = glm::dot(norm, sphere_from-triangle_a);
 	float dot_to = glm::dot(norm, sphere_to-triangle_a);
-	
+
 	float t0 = 1.0;
 	float t1 = -1.0;
 	//above triangle
@@ -167,12 +158,13 @@ bool collide_swept_sphere_vs_triangle(
 
 	glm::vec3 triangle_pt = at + glm::dot(triangle_a - at, norm)*norm;
 
-	if ((glm::dot(glm::cross(triangle_a-triangle_b,triangle_a-triangle_pt), norm)>=0
-		&&glm::dot(glm::cross(triangle_c-triangle_a,triangle_c-triangle_pt), norm)>=0
-		&&glm::dot(glm::cross(triangle_b-triangle_c,triangle_b-triangle_pt), norm)>=0)
-		||(glm::dot(glm::cross(triangle_a-triangle_b,triangle_a-triangle_pt), norm)<=0
-		&&glm::dot(glm::cross(triangle_c-triangle_a,triangle_c-triangle_pt), norm)<=0
-		&&glm::dot(glm::cross(triangle_b-triangle_c,triangle_b-triangle_pt), norm)<=0))
+	if ((glm::dot(glm::cross(triangle_a-triangle_b,triangle_a-triangle_pt), norm)>=0 &&
+		glm::dot(glm::cross(triangle_c-triangle_a,triangle_c-triangle_pt), norm)>=0 &&
+		glm::dot(glm::cross(triangle_b-triangle_c,triangle_b-triangle_pt), norm)>=0)
+		||
+    (glm::dot(glm::cross(triangle_a-triangle_b,triangle_a-triangle_pt), norm) <=0 &&
+		glm::dot(glm::cross(triangle_c-triangle_a,triangle_c-triangle_pt), norm) <=0 &&
+		glm::dot(glm::cross(triangle_b-triangle_c,triangle_b-triangle_pt), norm) <=0))
 
 	{
 		if(collision_t) *collision_t = at_t;
@@ -182,34 +174,34 @@ bool collide_swept_sphere_vs_triangle(
 	}
 
 	//vertices
-	
+
 	bool collided = false;
-	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from, 
+	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from,
 			       	triangle_a, sphere_radius, collision_t, nullptr, collision_out)){
 		collided = true;
 		if(collision_at) *collision_at = triangle_a;
 	}
-	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from, 
+	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from,
 			       	triangle_b, sphere_radius, collision_t, nullptr, collision_out)){
 		collided = true;
 		if(collision_at) *collision_at = triangle_b;
 	}
-	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from, 
+	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from,
 			       	triangle_c, sphere_radius, collision_t, nullptr, collision_out)){
 		collided = true;
 		if(collision_at) *collision_at = triangle_c;
 	}
 
 	//edges
-	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from, 
+	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
 				triangle_a,triangle_b, sphere_radius, collision_t, collision_at, collision_out)){
 		collided = true;
 	}
-	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from, 
+	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
 				triangle_b,triangle_c, sphere_radius, collision_t, collision_at, collision_out)){
 		collided = true;
 	}
-	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from, 
+	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
 				triangle_c,triangle_a, sphere_radius, collision_t, collision_at, collision_out)){
 		collided = true;
 	}
