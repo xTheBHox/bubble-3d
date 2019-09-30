@@ -61,10 +61,10 @@ BubbleLevel::BubbleLevel(std::string const &scene_file) {
 	transforms.emplace_back();
   player.transform = &transforms.back();
 	cameras.emplace_back(&transforms.back());
-	player.camera = cameras.back();
+	player.camera = &cameras.back();
 
-	camera->fovy = 60.0f / 180.0f * 3.1415926f;
-	camera->near = 0.05f;
+	player.camera->fovy = 60.0f / 180.0f * 3.1415926f;
+	player.camera->near = 0.05f;
 }
 
 BubbleLevel::BubbleLevel(BubbleLevel const &other) {
@@ -107,7 +107,10 @@ BubbleLevel &BubbleLevel::operator=(BubbleLevel const &other) {
 		cameras.back().transform = transform_to_transform.at(c.transform);
 
 		//update camera pointer when that camera is copied:
-		if (&c == other.camera) camera = &cameras.back();
+		if (&c == other.player.camera) {
+      player.camera = &cameras.back();
+      player.transform = cameras.back().transform;
+    }
 	}
 
 	//copy other's lamps, updating transform pointers:

@@ -38,16 +38,16 @@ struct BubbleLevel : Scene {
   // Bubble target(s) tracked using this structure:
   struct Bubble {
     Scene::Transform *transform = nullptr;
-    glm::vec3 vel = glm::vec(0.0f, 0.0f, 0.0f);
-    uint32_t const mass_log = 4;
-    float const r;
+    glm::vec3 vel = glm::vec3(0.0f, 0.0f, 0.0f);
+    uint32_t mass_log = 4;
+    float r;
     // glm::vec3 rot_vel;
   };
 
   struct Bullet {
     Scene::Transform *transform = nullptr;
     glm::vec3 vel;
-    float const r;
+    float r;
   };
 
 	// Player camera tracked using this structure:

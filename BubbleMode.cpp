@@ -89,7 +89,7 @@ void BubbleMode::update(float elapsed) {
 
   // 1. Update player velocity
   {
-    glm::vec3 player_dvel = glm::vec2(0.0f, 0.0f, 0.0f);
+    glm::vec3 player_dvel = glm::vec3(0.0f, 0.0f, 0.0f);
     if (controls.left) player_dvel.x -= 1.0f;
     if (controls.right) player_dvel.x += 1.0f;
     if (controls.backward) player_dvel.y -= 1.0f;
@@ -350,7 +350,7 @@ void BubbleMode::update(float elapsed) {
 
 }
 
-void RollMode::draw(glm::uvec2 const &drawable_size) {
+void BubbleMode::draw(glm::uvec2 const &drawable_size) {
 	//--- actual drawing ---
 	glClearColor(0.45f, 0.45f, 0.50f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -358,8 +358,8 @@ void RollMode::draw(glm::uvec2 const &drawable_size) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	level.camera->aspect = drawable_size.x / float(drawable_size.y);
-	level.draw(*level.camera);
+	level.player.camera->aspect = drawable_size.x / float(drawable_size.y);
+	level.draw(*level.player.camera);
 
 	{ //help text overlay:
 		glDisable(GL_DEPTH_TEST);
@@ -398,7 +398,9 @@ void RollMode::draw(glm::uvec2 const &drawable_size) {
 
 	if (DEBUG_draw_lines) { //DEBUG drawing:
 		//adjust world-to-clip matrix to current camera:
-		DEBUG_draw_lines->world_to_clip = level.camera->make_projection() * level.camera->transform->make_world_to_local();
+		DEBUG_draw_lines->world_to_clip =
+      level.player.camera->make_projection() *
+      level.player.camera->transform->make_world_to_local();
 		//delete object (draws in destructor):
 		DEBUG_draw_lines.reset();
 	}
@@ -407,7 +409,7 @@ void RollMode::draw(glm::uvec2 const &drawable_size) {
 	GL_ERRORS();
 }
 
-void RollMode::restart() {
+void BubbleMode::restart() {
 	level = start;
 	won = false;
 }

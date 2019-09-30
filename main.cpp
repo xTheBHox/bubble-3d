@@ -2,7 +2,7 @@
 #include "Mode.hpp"
 
 //Starting mode:
-#include "RollMode.hpp"
+#include "BubbleMode.hpp"
 
 //Deal with calling resource loading functions:
 #include "Load.hpp"
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
 	//create window:
 	SDL_Window *window = SDL_CreateWindow(
-		"gp19 Sphere Roller", //TODO: remember to set a title for your game!
+		"Bubble Trouble 3D", //TODO: remember to set a title for your game!
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		800, 540, //TODO: modify window size if you'd like
 		SDL_WINDOW_OPENGL
@@ -102,16 +102,16 @@ int main(int argc, char **argv) {
 	if (argc > 1) {
 		int32_t level = -1;
 		if (argc >= 2) level = std::stoi(argv[1]);
-		if (argc != 2 || level < 0 || level >= int32_t(roll_levels->size())) {
+		if (argc != 2 || level < 0 || level >= int32_t(bubble_levels->size())) {
 			std::cerr << "Usage:\n\t" << argv[0] << " [level number]" << std::endl;
 		}
-		auto level_iter = roll_levels->begin();
+		auto level_iter = bubble_levels->begin();
 		for (int32_t i = 0; i < level; ++i) {
 			++level_iter;
 		}
-		Mode::set_current(std::make_shared< RollMode >(*level_iter));
+		Mode::set_current(std::make_shared< BubbleMode >(*level_iter));
 	} else {
-		Mode::set_current(std::make_shared< RollMode >(roll_levels->front()));
+		Mode::set_current(std::make_shared< BubbleMode >(bubble_levels->front()));
 	}
 
 	//------------ main loop ------------
@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
 		}
 
 		{ //(3) call the current mode's "draw" function to produce output:
-		
+
 			Mode::current->draw(drawable_size);
 		}
 
