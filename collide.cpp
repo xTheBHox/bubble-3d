@@ -12,10 +12,10 @@ bool collide_AABB_vs_AABB(
 	glm::vec3 const &b_min, glm::vec3 const &b_max
 ) {
 	return !(
-    a_min.x > b_max.x || b_min.x > a_max.x ||
-    a_min.y > b_max.y	|| b_min.y > a_max.y ||
-    a_min.z > b_max.z	|| b_min.z > a_max.z
-  );
+		a_min.x > b_max.x || b_min.x > a_max.x ||
+		a_min.y > b_max.y || b_min.y > a_max.y ||
+		a_min.z > b_max.z || b_min.z > a_max.z
+	);
 }
 
 //helper: normalize but don't return NaN:
@@ -67,6 +67,16 @@ bool collide_ray_vs_sphere(
 		if (collision_normal) *collision_normal = careful_normalize((ray_start + t0 * ray_direction) - sphere_center);
 		return true;
 	}
+}
+
+bool collide_swept_sphere_vs_point(
+	glm::vec3 const &sphere_from, glm::vec3 const &sphere_to, float sphere_radius,
+	glm::vec3 const &point,
+	float *collision_t, glm::vec3 *collision_at, glm::vec3 *collision_out
+) {
+	bool collided = collide_ray_vs_sphere(sphere_from, sphere_to - sphere_from, point, sphere_radius, collision_t, nullptr, collision_out);
+	if (collided && collision_at) *collision_at = point;
+	return collided; 
 }
 
 bool collide_ray_vs_cylinder(glm::vec3 ray_start, glm::vec3 ray_direction,
@@ -123,6 +133,26 @@ bool collide_ray_vs_cylinder(glm::vec3 ray_start, glm::vec3 ray_direction,
 	return false;
 }
 
+bool collide_swept_sphere_vs_swept_sphere(
+	glm::vec3 const &sphere0_from, glm::vec3 const &sphere0_to, float sphere0_radius,
+	glm::vec3 const &sphere1_from, glm::vec3 const &sphere1_to, float sphere1_radius,
+	float *collision_t, glm::vec3 *collision_at, glm::vec3 *collision_out
+) {
+	glm::vec3 sphere1_dir = sphere1_to - sphere1_from;
+	glm::vec3 dir_sum = sphere0_to - sphere0_from - sphere1_dir;
+	float t;
+	glm::vec3 at;
+	bool collided = collide_ray_vs_sphere(sphere0_from, sphere0_from + dir_sum, sphere1_from, sphere0_radius + sphere1_radius, &t, &at, collision_out);
+	if (collided) {
+		if (collision_t) *collision_t = t;
+		if (collision_at) {
+			at += t * sphere1_dir;
+			*collision_at = at;
+		}
+	}
+	return collided;
+
+}
 bool collide_swept_sphere_vs_triangle(
 	glm::vec3 const &sphere_from, glm::vec3 const &sphere_to, float sphere_radius,
 	glm::vec3 const &triangle_a, glm::vec3 const &triangle_b, glm::vec3 const &triangle_c,
@@ -130,9 +160,9 @@ bool collide_swept_sphere_vs_triangle(
 ) {
 
 	float t = 2.0f;
-	if(collision_t){
+	if (collision_t) {
 		t = std::min(t, *collision_t);
-		if(t<=0.0f) return false;
+		if (t <= 0.0f) return false;
 	}
 	glm::vec3 perp = glm::cross(triangle_b-triangle_a, triangle_c-triangle_a);
 	glm::vec3 norm = glm::normalize(perp);
@@ -143,24 +173,24 @@ bool collide_swept_sphere_vs_triangle(
 	float t0 = 1.0;
 	float t1 = -1.0;
 	//above triangle
-	if(dot_from>0.0f && dot_to<dot_from){
+	if (dot_from>0.0f && dot_to<dot_from){
 		t0 = (sphere_radius - dot_from) / (dot_to - dot_from);
 		t1 = (-sphere_radius - dot_from) / (dot_to - dot_from);
-	}else if(dot_from<0.0f && dot_to>dot_from){
+	} else if (dot_from<0.0f && dot_to>dot_from){
 		t0 = (-sphere_radius - dot_from) / (dot_to - dot_from);
 		t1 = (sphere_radius - dot_from) / (dot_to - dot_from);
 	}
 
-	if(t1<0.0f || t0>t) return false;
+	if (t1<0.0f || t0>t) return false;
 
 	float at_t = glm::max(0.0f, t0);
 	glm::vec3 at = glm::mix(sphere_from, sphere_to, at_t);
 
 	glm::vec3 triangle_pt = at + glm::dot(triangle_a - at, norm)*norm;
 
-	if ((glm::dot(glm::cross(triangle_a-triangle_b,triangle_a-triangle_pt), norm)>=0 &&
-		glm::dot(glm::cross(triangle_c-triangle_a,triangle_c-triangle_pt), norm)>=0 &&
-		glm::dot(glm::cross(triangle_b-triangle_c,triangle_b-triangle_pt), norm)>=0)
+	if ((glm::dot(glm::cross(triangle_a-triangle_b,triangle_a-triangle_pt), norm) >= 0 &&
+		glm::dot(glm::cross(triangle_c-triangle_a,triangle_c-triangle_pt), norm) >= 0 &&
+		glm::dot(glm::cross(triangle_b-triangle_c,triangle_b-triangle_pt), norm) >= 0)
 		||
     (glm::dot(glm::cross(triangle_a-triangle_b,triangle_a-triangle_pt), norm) <=0 &&
 		glm::dot(glm::cross(triangle_c-triangle_a,triangle_c-triangle_pt), norm) <=0 &&
@@ -176,33 +206,30 @@ bool collide_swept_sphere_vs_triangle(
 	//vertices
 
 	bool collided = false;
-	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from,
-			       	triangle_a, sphere_radius, collision_t, nullptr, collision_out)){
+	if (collide_swept_sphere_vs_point(sphere_from, sphere_to, sphere_radius,
+		triangle_a, collision_t, collision_at, collision_out)) {
 		collided = true;
-		if(collision_at) *collision_at = triangle_a;
 	}
-	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from,
-			       	triangle_b, sphere_radius, collision_t, nullptr, collision_out)){
+	if (collide_swept_sphere_vs_point(sphere_from, sphere_to, sphere_radius,
+		triangle_b, collision_t, collision_at, collision_out)) {
 		collided = true;
-		if(collision_at) *collision_at = triangle_b;
 	}
-	if(collide_ray_vs_sphere(sphere_from, sphere_to-sphere_from,
-			       	triangle_c, sphere_radius, collision_t, nullptr, collision_out)){
+	if (collide_swept_sphere_vs_point(sphere_from, sphere_to, sphere_radius,
+		triangle_c, collision_t, collision_at, collision_out)) {
 		collided = true;
-		if(collision_at) *collision_at = triangle_c;
 	}
 
 	//edges
-	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
-				triangle_a,triangle_b, sphere_radius, collision_t, collision_at, collision_out)){
+	if (collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
+				triangle_a,triangle_b, sphere_radius, collision_t, collision_at, collision_out)) {
 		collided = true;
 	}
-	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
-				triangle_b,triangle_c, sphere_radius, collision_t, collision_at, collision_out)){
+	if (collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
+				triangle_b,triangle_c, sphere_radius, collision_t, collision_at, collision_out)) {
 		collided = true;
 	}
-	if(collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
-				triangle_c,triangle_a, sphere_radius, collision_t, collision_at, collision_out)){
+	if (collide_ray_vs_cylinder(sphere_from, sphere_to-sphere_from,
+				triangle_c,triangle_a, sphere_radius, collision_t, collision_at, collision_out)) {
 		collided = true;
 	}
 

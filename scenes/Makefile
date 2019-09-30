@@ -1,15 +1,15 @@
 
-BLENDER=../../blender-2.80-linux-glibc217-x86_64/blender
+BLENDER=../../blender/blender
 
 all : \
 	../dist/bubble-parts.pnct \
 	../dist/bubble-level-1.scene
 
 
-../dist/bubble-parts.pnct : sphere-roller.blend export-meshes.py
-	$(BLENDER) --background --python export-meshes.py -- sphere-roller.blend:Parts '$@'
+../dist/bubble-parts.pnct : bubble.blend export-meshes.py
+	$(BLENDER) --background --python export-meshes.py -- bubble.blend:Parts '$@'
 
-../dist/bubble-level-1.scene : sphere-roller.blend export-scene.py
+../dist/bubble-level-1.scene : bubble.blend export-scene.py
 	$(BLENDER) --background --python export-scene.py -- bubble.blend:Level.001 '$@'
 
 #../dist/city.scene : city.blend export-scene.py
