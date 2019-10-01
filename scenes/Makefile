@@ -1,16 +1,16 @@
 
-BLENDER=../../blender/blender
+BLENDER="Z:\Program Files\Blender Foundation\Blender\blender.exe"
 
 all : \
-	../dist/bubble-parts.pnct \
-	../dist/bubble-level-1.scene
+	..\dist\bubble-parts.pnct \
+	..\dist\bubble-level-1.scene
 
 
-../dist/bubble-parts.pnct : bubble.blend export-meshes.py
-	$(BLENDER) --background --python export-meshes.py -- bubble.blend:Parts '$@'
+..\dist\bubble-parts.pnct: bubble.blend export-meshes.py
+	$(BLENDER) --background --python export-meshes.py -- bubble.blend:Parts $@
 
-../dist/bubble-level-1.scene : bubble.blend export-scene.py
-	$(BLENDER) --background --python export-scene.py -- bubble.blend:Level.001 '$@'
+..\dist\bubble-level-1.scene: bubble.blend export-scene.py
+	$(BLENDER) --background --python export-scene.py -- bubble.blend:Level.001 $@
 
 #../dist/city.scene : city.blend export-scene.py
 #	$(BLENDER) --background --python export-scene.py -- city.blend:Scene '$@'

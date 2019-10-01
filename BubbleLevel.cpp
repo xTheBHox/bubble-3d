@@ -38,8 +38,7 @@ Load< std::list< BubbleLevel > > bubble_levels(LoadTagLate, []() -> std::list< B
 //-------- BubbleLevel ---------
 
 BubbleLevel::BubbleLevel(std::string const &scene_file) {
-	uint32_t decorations = 0;
-  auto load_fn = [this,&scene_file,&decorations](Scene &, Transform *transform, std::string const &mesh_name){
+  auto load_fn = [this](Scene &, Transform *transform, std::string const &mesh_name){
     Mesh const *mesh = &bubble_meshes->lookup(mesh_name);
 
     drawables.emplace_back(transform);
@@ -62,9 +61,12 @@ BubbleLevel::BubbleLevel(std::string const &scene_file) {
   player.transform = &transforms.back();
 	cameras.emplace_back(&transforms.back());
 	player.camera = &cameras.back();
+	player.camera->transform = &transforms.back();
 
 	player.camera->fovy = 60.0f / 180.0f * 3.1415926f;
 	player.camera->near = 0.05f;
+  player.camera->transform->position.z = 2.0f;
+
 }
 
 BubbleLevel::BubbleLevel(BubbleLevel const &other) {
@@ -119,20 +121,52 @@ BubbleLevel &BubbleLevel::operator=(BubbleLevel const &other) {
 		l.transform = transform_to_transform.at(l.transform);
 	}
 
-	bubbles = other.bubbles;
-	for (auto &b : bubbles) {
-		b.transform = transform_to_transform.at(b.transform);
-	}
-
   /* Don't copy bullets
 	bullets = other.bullets;
-	for (auto &b : bubbles) {
-		b.transform = transform_to_transform.at(b.transform);
-	}
   */
 
-	player = other.player;
-	player.transform = transform_to_transform.at(player.transform);
+	//player = other.player;
+	//player.transform = transform_to_transform.at(player.transform);
 
 	return *this;
+}
+
+BubbleLevel::Bullet::Bullet(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_) {
+  transform.position = pos;
+  vel = vel_;
+
+  lvl.drawables.emplace_front(&transform);
+  draw_it = lvl.drawables.begin();
+  Drawable::Pipeline &pipeline = lvl.drawables.front().pipeline;
+
+  //set up drawable to draw mesh from buffer:
+  pipeline = lit_color_texture_program_pipeline;
+  pipeline.vao = bubble_meshes_for_lit_color_texture_program;
+  pipeline.type = mesh_Bullet->type;
+  pipeline.start = mesh_Bullet->start;
+  pipeline.count = mesh_Bullet->count;
+
+}
+
+BubbleLevel::Bubble::Bubble(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_, uint32_t mass_) {
+  vel = vel_;
+  mass = mass_;
+  transform.position = pos;
+  transform.scale = glm::vec3(0.5f) * (float) mass;
+
+  lvl.drawables.emplace_front(&transform);
+  draw_it = lvl.drawables.begin();
+  Drawable::Pipeline &pipeline = lvl.drawables.front().pipeline;
+
+  //std::cout << &transform << std::endl;
+  //std::cout << draw_it->transform << std::endl;
+  //std::cout << drawables->front().transform << std::endl;
+
+  //set up drawable to draw mesh from buffer:
+  pipeline = lit_color_texture_program_pipeline;
+  pipeline.vao = bubble_meshes_for_lit_color_texture_program;
+  pipeline.type = mesh_Bubble->type;
+  pipeline.start = mesh_Bubble->start;
+  pipeline.count = mesh_Bubble->count;
+
 }

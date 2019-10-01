@@ -1,8 +1,8 @@
-# (TODO: your game's title)
+# Bubble 3D
 
-Author: (TODO: your name)
+Author: Benjamin Huang
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: It's the classic game Bubble Trouble, but now in 3D. Sorry it's kinda barebones. Lots of extra room for improvement.
 
 Screen Shot:
 
@@ -10,10 +10,10 @@ Screen Shot:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+WASD to move, left mouse button to shoot. Mouse to control camera. Esc to pause. Backspace to restart level.
 
-Sources:
+Shoot all the bubbles until they are cleared. Bubbles split into smaller bubbles.
 
-(TODO: fill in information about the sources of any **artwork** or **sounds** you used in the game that you did not create yourself. Feel free to also credit yourself for things you did make.)
+Sources: self, and the gp19 font assets
 
 This game was built with [NEST](NEST.md).

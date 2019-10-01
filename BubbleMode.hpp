@@ -28,7 +28,16 @@ struct BubbleMode : Mode {
 		bool backward = false;
 		bool left = false;
 		bool right = false;
+    bool mouse_locked = true;
+    bool mouse_down = false;
+    bool pause = false;
+    float mouse_sensitivity = 4.0f;
 	} controls;
+
+  struct {
+    float cooldown = 0.5f;
+    float cooldown_counter = 0.0f;
+  } gun;
 
 	//fly around for collsion debug:
 	bool DEBUG_fly = false;
@@ -37,4 +46,7 @@ struct BubbleMode : Mode {
 
 	//some debug drawing done during update:
 	std::unique_ptr< DrawLines > DEBUG_draw_lines;
+
+  float gravity = -0.2f;
+
 };

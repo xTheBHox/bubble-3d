@@ -43,10 +43,10 @@ bool RollMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				++current;
 			}
 			assert(current != roll_levels->end());
-	
+
 			++current;
 			if (current == roll_levels->end()) current = roll_levels->begin();
-	
+
 			//launch a new RollMode with the next level:
 			Mode::set_current(std::make_shared< RollMode >(*current));
 		}
@@ -101,7 +101,7 @@ bool RollMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -160,7 +160,7 @@ void RollMode::update(float elapsed) {
 		if (!DEBUG_draw_lines) {
 			DEBUG_draw_lines.reset(new DrawLines(glm::mat4(1.0f)));
 		}
-		
+
 		//collide against level:
 		float remain = elapsed;
 		for (int32_t iter = 0; iter < 10; ++iter) {

@@ -37,17 +37,19 @@ struct BubbleLevel : Scene {
 
   // Bubble target(s) tracked using this structure:
   struct Bubble {
-    Scene::Transform *transform = nullptr;
-    glm::vec3 vel = glm::vec3(0.0f, 0.0f, 0.0f);
-    uint32_t mass_log = 4;
-    float r;
+    Bubble(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_, uint32_t mass_);
+    std::list< Scene::Drawable >::iterator draw_it;
+    Scene::Transform transform;
+    glm::vec3 vel;
+    uint32_t mass;
     // glm::vec3 rot_vel;
   };
 
   struct Bullet {
-    Scene::Transform *transform = nullptr;
+    Bullet(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_);
+    std::list< Scene::Drawable >::iterator draw_it;
+    Scene::Transform transform;
     glm::vec3 vel;
-    float r;
   };
 
 	// Player camera tracked using this structure:
@@ -55,14 +57,18 @@ struct BubbleLevel : Scene {
     Scene::Camera *camera = nullptr;
     Scene::Transform *transform = nullptr;
 		glm::vec3 vel = glm::vec3(0.0f, 0.0f, 0.0f);
-    float view_azimuth;
-    float view_elevation;
+    float view_azimuth = 0.0f;
+    float view_elevation = 0.0f;
 	};
 
+  struct {
+    glm::vec3 min = glm::vec3(-20.0f, -20.0f, 0.0f);
+    glm::vec3 max = glm::vec3(20.0f, 20.0f, 15.0f);
+  } arena_bounds;
+
 	//Additional information for things in the level:
-	std::vector< MeshCollider > mesh_colliders;
-	std::vector< Bubble > bubbles;
-  std::vector< Bullet > bullets;
+	std::list< Bubble > bubbles;
+  std::list< Bullet > bullets;
 	PlayerCam player;
 
 };

@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 	SDL_Window *window = SDL_CreateWindow(
 		"Bubble Trouble 3D", //TODO: remember to set a title for your game!
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		800, 540, //TODO: modify window size if you'd like
+		1280, 960, //TODO: modify window size if you'd like
 		SDL_WINDOW_OPENGL
 		| SDL_WINDOW_RESIZABLE //uncomment to allow resizing
 		| SDL_WINDOW_ALLOW_HIGHDPI //uncomment for full resolution on high-DPI screens
@@ -115,6 +115,7 @@ int main(int argc, char **argv) {
 	}
 
 	//------------ main loop ------------
+  SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	//this inline function will be called whenever the window is resized,
 	// and will update the window_size and drawable_size variables:
