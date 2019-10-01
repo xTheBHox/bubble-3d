@@ -37,7 +37,7 @@ struct BubbleLevel : Scene {
 
   // Bubble target(s) tracked using this structure:
   struct Bubble {
-    Bubble(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_, uint32_t mass_);
+    Bubble(BubbleLevel &lvl, glm::vec3 pos, glm::vec3 vel_, uint32_t mass_);
     std::list< Scene::Drawable >::iterator draw_it;
     Scene::Transform transform;
     glm::vec3 vel;
@@ -46,7 +46,7 @@ struct BubbleLevel : Scene {
   };
 
   struct Bullet {
-    Bullet(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_);
+    Bullet(BubbleLevel &lvl, glm::vec3 pos, glm::vec3 vel_);
     std::list< Scene::Drawable >::iterator draw_it;
     Scene::Transform transform;
     glm::vec3 vel;

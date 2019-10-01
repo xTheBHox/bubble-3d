@@ -131,7 +131,7 @@ BubbleLevel &BubbleLevel::operator=(BubbleLevel const &other) {
 	return *this;
 }
 
-BubbleLevel::Bullet::Bullet(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_) {
+BubbleLevel::Bullet::Bullet(BubbleLevel &lvl, glm::vec3 pos, glm::vec3 vel_) {
   transform.position = pos;
   vel = vel_;
 
@@ -148,7 +148,7 @@ BubbleLevel::Bullet::Bullet(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_) {
 
 }
 
-BubbleLevel::Bubble::Bubble(BubbleLevel &lvl, glm::vec3 &pos, glm::vec3 &vel_, uint32_t mass_) {
+BubbleLevel::Bubble::Bubble(BubbleLevel &lvl, glm::vec3 pos, glm::vec3 vel_, uint32_t mass_) {
   vel = vel_;
   mass = mass_;
   transform.position = pos;
